@@ -84,8 +84,6 @@ if __name__ == '__main__':
     if not os.path.exists(opt.save):
         os.makedirs(opt.save)
 
-    
-
     # load model and scheduler
     from SR_pipe import LDMSuperResolutionPipeline
     pipeline = LDMSuperResolutionPipeline.from_pretrained(model_id)

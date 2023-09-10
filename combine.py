@@ -14,14 +14,20 @@ def vectorize(latent_in, pool):
     fv = torch.flatten(output).detach().clone()
     return fv
 
-def feature_matrix(path, pool, save):
+def feature_matrix(flop, pool, save):
     fv = []
-    for i in range(len(path)):
-        full_path = path + '/' + str(i) + '.pt'
-        lat_matrix = torch.load(full_path)
-        v = vectorize(lat_matrix, pool)
-        fv.append(v)
-    
+
+    if type(flop) == str:
+        for i in range(len(os.listdir(flop))):
+            full_path = flop + '/' + str(i) + '.pt'
+            lat_matrix = torch.load(full_path)
+            v = vectorize(lat_matrix, pool)
+            fv.append(v)
+    else:
+        for f in flop:
+            v = vectorize(f, pool)
+            fv.append(v)
+
     fm = torch.cat(fv, dim=0)
 
     if save:
