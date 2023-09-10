@@ -164,6 +164,8 @@ class LDMSuperResolutionPipeline(DiffusionPipeline):
         if accepts_eta:
             extra_kwargs["eta"] = eta
 
+        all_latents = []
+
         for t in self.progress_bar(timesteps_tensor):
             # concat latents and low resolution image in the channel dimension.
             latents_input = torch.cat([latents, image], dim=1)
@@ -172,7 +174,11 @@ class LDMSuperResolutionPipeline(DiffusionPipeline):
             noise_pred = self.unet(latents_input, t).sample
             # compute the previous noisy sample x_t -> x_t-1
             latents = self.scheduler.step(noise_pred, t, latents, **extra_kwargs).prev_sample
-        return latents
+            all_latents.append(latents[:, None, :, :, :])
+
+        features = torch.cat(all_latents, dim=1)
+        print(features.shape)
+        return features
         # decode the image latents with the VQVAE
         image = self.vqvae.decode(latents).sample
         image = torch.clamp(image, -1.0, 1.0)
