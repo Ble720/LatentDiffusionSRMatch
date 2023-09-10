@@ -28,17 +28,6 @@ def get_batch(path_list, batch_size, color):
             img_batch = []
     
 
-def vectorize(latent_in, pool):
-    if pool == 'max':
-        pool = torch.nn.MaxPool2d(4, padding=2, stride=2)
-        output = pool(latent_in)
-    elif pool == 'avg':
-        pool = torch.nn.AvgPool2d(4, padding=2, stride=2)
-        output = pool(latent_in)
-    else:
-        output = latent_in
-    fv = torch.flatten(output).detach().clone()
-    return fv
 
 def get_features(model, img_path, color, num_step=100):
     features = []
