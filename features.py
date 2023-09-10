@@ -70,10 +70,9 @@ def save_features(model, img_path, sv_path, resume, color, batch_size, num_step=
         latent_embs = model(batch, num_inference_steps=num_step, eta=1)
         lat_matrix = latent_embs.detach().cpu()
 
-        for b in range(16):
+        for b in range(batch_size):
             full_sv_path = sv_path + '/' + str(i) + '.pt'
-            print(lat_matrix[b].shape)
-            torch.save(lat_matrix[b], full_sv_path)
+            torch.save(lat_matrix[b].clone(), full_sv_path)
             i += 1
     
 #Run to save image features
@@ -97,8 +96,7 @@ if __name__ == '__main__':
     if not os.path.exists(opt.save):
         os.makedirs(opt.save)
 
-    a = torch.load('./sv100_raw_newtarget/0.pt')
-    print(a.shape)
+    
 
     # load model and scheduler
     from SR_pipe import LDMSuperResolutionPipeline

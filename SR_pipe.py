@@ -176,9 +176,7 @@ class LDMSuperResolutionPipeline(DiffusionPipeline):
             latents = self.scheduler.step(noise_pred, t, latents, **extra_kwargs).prev_sample
             all_latents.append(latents[:, None, :, :, :])
 
-        features = torch.cat(all_latents, dim=1)
-        print(features.shape)
-        return features
+        return torch.cat(all_latents, dim=1)
         # decode the image latents with the VQVAE
         image = self.vqvae.decode(latents).sample
         image = torch.clamp(image, -1.0, 1.0)
