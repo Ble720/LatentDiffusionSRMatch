@@ -27,20 +27,19 @@ def get_batch(path_list, batch_size, color):
             yield torch.stack(img_batch)
             img_batch = []
     
-
-
-def get_features(model, img_path, color, num_step=100):
+def get_features(model, img_path, color, batch_size, num_step=100):
     features = []
+    all_path = []
+
     for fRoot, fDirs, fFiles in os.walk(img_path):
         for ffile in fFiles:
             full_path = os.path.join(fRoot, ffile).replace('/', os.sep)
+            all_path.append(full_path)
 
-            size = (128, 128)
-            low_res = load_img(full_path, size , color)
-            latent_emb = model(low_res, num_inference_steps=num_step, eta=1)
-
-            feat = torch.unsqueeze(latent_emb.detach().cpu(), dim=0)
-            features.append(feat)
+    for batch in get_batch(all_path, batch_size, color):
+        latent_embs = model(batch, num_inference_steps=num_step, eta=1)
+        lat_matrix = latent_embs.detach().cpu()
+        features.append(lat_matrix)
 
     return features
 
@@ -59,7 +58,7 @@ def save_features(model, img_path, sv_path, resume, color, batch_size, num_step=
         latent_embs = model(batch, num_inference_steps=num_step, eta=1)
         lat_matrix = latent_embs.detach().cpu()
 
-        for b in range(batch_size):
+        for b in range(len(batch)):
             full_sv_path = sv_path + '/' + str(i) + '.pt'
             torch.save(lat_matrix[b].clone(), full_sv_path)
             i += 1
