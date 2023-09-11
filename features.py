@@ -54,12 +54,15 @@ def save_features(model, img_path, sv_path, resume, color, batch_size, num_step=
 
     all_path = all_path[i:]
 
+    name_len = len(str(i + len(all_path)))
+
     for batch in get_batch(all_path, batch_size, color):
         latent_embs = model(batch, num_inference_steps=num_step, eta=1)
         lat_matrix = latent_embs.detach().cpu()
 
         for b in range(len(batch)):
-            full_sv_path = sv_path + '/' + str(i) + '.pt'
+            fname = str(i)
+            full_sv_path = sv_path + '/' + fname.zfill(name_len) + '.pt'
             torch.save(lat_matrix[b].clone(), full_sv_path)
             i += 1
     

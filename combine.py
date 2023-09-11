@@ -12,35 +12,39 @@ def vectorize(latent_in, pool):
     else:
         output = latent_in
     fv = torch.flatten(output).detach().clone()
-    return fv
+    return fv[None, :]
 
 def feature_matrix(flop, pool, save):
-    fv = []
+    fm = None
 
     if type(flop) == str:
-        for i in range(len(os.listdir(flop))):
-            full_path = flop + '/' + str(i) + '.pt'
-            lat_matrix = torch.load(full_path)
+        for p in os.listdir(flop):
+            full_path = flop + '/' + p
+            lat_matrix = torch.load(full_path.replace('/', os.sep))
             v = vectorize(lat_matrix, pool)
-            fv.append(v)
+            if fm == None:
+                fm = v
+            else:
+                fm = torch.cat([fm, v], dim=0)
     else:
         for f in flop:
             v = vectorize(f, pool)
-            fv.append(v)
-
-    fm = torch.cat(fv, dim=0)
+            if fm == None:
+                fm = v
+            else:
+                fm = torch.cat([fm, v], dim=0)
 
     if save:
         torch.save(fm, save + '/features.pt')
 
-    print(f'Combined {len(fv)} .pt files to a {fm.shape} tensor\n')
+    print(f'Combined {fm.shape[0]} .pt files to a {fm.shape} tensor\n')
     return fm
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', type=str)
     parser.add_argument('--save', type=str)
-    parser.add_argument('--pool', type=str, defaul='none')
+    parser.add_argument('--pool', type=str, default='none')
     opt = parser.parse_args()
 
     if not opt.source or not opt.save:
